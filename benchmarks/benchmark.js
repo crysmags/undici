@@ -25,6 +25,7 @@ const parallelRequests = parseInt(process.env.PARALLEL, 10) || 100
 const headersTimeout = parseInt(process.env.HEADERS_TIMEOUT, 10) || 0
 const bodyTimeout = parseInt(process.env.BODY_TIMEOUT, 10) || 0
 const dest = {}
+const diagnosticsChannel = require('node:diagnostics_channel')
 
 if (process.env.PORT) {
   dest.port = process.env.PORT
@@ -285,6 +286,15 @@ if (process.env.PORT) {
             callback()
           }
         })).on('finish', resolve)
+      }).catch(console.log)
+    })
+  }
+
+  experiments['undici - fetch (with diagnostics channel)'] = () => {
+    diagnosticsChannel.subscribe('undici:fetch:asyncEnd', () => {})
+    return makeParallelRequests(resolve => {
+      fetch(dest.url).then(res => {
+        res.body.pipeTo(new WritableStream({ write () {}, close () { resolve() } }))
       }).catch(console.log)
     })
   }
