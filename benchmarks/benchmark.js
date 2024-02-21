@@ -297,7 +297,7 @@ if (process.env.PORT) {
       fetch(dest.url).then(res => {
         res.body.pipeTo(new WritableStream({ write () {}, close () { resolve() } }))
       }).catch(console.log)
-    }).finally( () => { diagnosticsChannel.unsubscribe('undici:fetch:asyncEnd', onMessage) })
+    }).finally(() => { diagnosticsChannel.unsubscribe('undici:fetch:asyncEnd', onMessage) })
   }
 
   experiments.axios = () => {
