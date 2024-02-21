@@ -291,12 +291,13 @@ if (process.env.PORT) {
   }
 
   experiments['undici - fetch (with diagnostics channel)'] = () => {
-    diagnosticsChannel.subscribe('undici:fetch:asyncEnd', () => {})
+    const onMessage = () => {}
+    diagnosticsChannel.subscribe('undici:fetch:asyncEnd', onMessage)
     return makeParallelRequests(resolve => {
       fetch(dest.url).then(res => {
         res.body.pipeTo(new WritableStream({ write () {}, close () { resolve() } }))
       }).catch(console.log)
-    })
+    }).finally( () => { diagnosticsChannel.unsubscribe('undici:fetch:asyncEnd', onMessage) })
   }
 
   experiments.axios = () => {
